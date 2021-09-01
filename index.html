@@ -1,0 +1,528 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+<title>Оперативна пам'ять з точки зору програміста</title>
+		<link rel="stylesheet" href="dist/reset.css">
+		<link rel="stylesheet" href="dist/reveal.css">
+<link rel="stylesheet" href="dist/theme/white.css" id="theme">
+		<!-- Theme used for syntax highlighted code -->
+<link rel="stylesheet" href="plugin/highlight/zenburn.css" id="highlight-theme"></head>
+	<body>
+		<div class="reveal">
+			<div class="slides">
+<section data-markdown  ><textarea data-template>
+## Оперативна пам'ять з точки зору програміста
+
+Богдюк Микола (Java, C++, Rust, C#)
+
+<!-- [comment]: # (!!!)
+## Про що?
+Орієнтовано на нативні програми (Asm, C, C++, Rust, Objective C, Swift)
+
+Мета - розкласти по поличкам екстрапольовані здогадки -->
+
+</textarea></section>
+<section data-markdown  data-auto-animate><textarea data-template>
+## Struct
+```c++
+struct S1 {
+	int32_t a;
+	int32_t b;
+	int32_t c;
+	int32_t d;
+}
+```
+
+</textarea></section>
+<section data-markdown  data-auto-animate><textarea data-template>
+## Struct
+```c++
+struct S1 {
+	int32_t a;
+	int32_t b;
+	int32_t c;
+	int32_t d;
+}
+```
+* sizeof(S1) = 16
+
+||||||||||||||||||
+|----|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|
+|    |0|1|2|3|4|5|6|7|8|9|A|B|C|D|E|F|
+|0x00|a|a|a|a|b|b|b|b|c|c|c|c|d|d|d|d|
+|
+
+</textarea></section>
+<section data-markdown  data-auto-animate><textarea data-template>
+## Struct 1-4-4-4
+```c++
+struct S2 {
+	int8_t a;
+	int32_t b;
+	int32_t c;
+	int32_t d;
+}
+```
+
+</textarea></section>
+<section data-markdown  data-auto-animate><textarea data-template>
+## Struct 1-4-4-4
+```c++
+struct S2 {
+	int8_t a;
+	int32_t b;
+	int32_t c;
+	int32_t d;
+}
+```
+* sizeof(S2) = 16
+
+||||||||||||||||||
+|----|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|
+|    |0|1|2|3|4|5|6|7|8|9|A|B|C|D|E|F|
+|0x00|a|-|-|-|b|b|b|b|c|c|c|c|d|d|d|d|
+|
+
+</textarea></section>
+<section data-markdown  data-auto-animate><textarea data-template>
+## Struct 1-2-4-4
+```c++
+struct S3 {
+	int8_t a;
+	int16_t b;
+	int32_t c;
+	int32_t d;
+}
+```
+
+</textarea></section>
+<section data-markdown  data-auto-animate><textarea data-template>
+## Struct 1-2-4-4
+```c++
+struct S3 {
+	int8_t a;
+	int16_t b;
+	int32_t c;
+	int32_t d;
+}
+```
+* sizeof(S3) = 12
+
+||||||||||||||||||
+|----|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|
+|    |0|1|2|3|4|5|6|7|8|9|A|B|C|D|E|F|
+|0x00|a|-|b|b|c|c|c|c|d|d|d|d|
+|
+
+</textarea></section>
+<section data-markdown  data-auto-animate><textarea data-template>
+## Struct 1-2-4-4-8
+```c++
+struct S4 {
+	int8_t a;
+	int16_t b;
+	int32_t c;
+	int32_t d;
+	int64_t e;
+}
+```
+
+</textarea></section>
+<section data-markdown  data-auto-animate><textarea data-template>
+## Struct 1-2-4-4-8
+```c++
+struct S4 {
+	int8_t a;
+	int16_t b;
+	int32_t c;
+	int32_t d;
+	int64_t e;
+}
+```
+* sizeof(S4) = 24
+
+||||||||||||||||||
+|----|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|
+|    |0|1|2|3|4|5|6|7|8|9|A|B|C|D|E|F|
+|0x00|a|-|b|b|c|c|c|c|d|d|d|d|-|-|-|-|
+|0x10|e|e|e|e|e|e|e|e|
+|
+
+</textarea></section>
+<section data-markdown  data-auto-animate><textarea data-template>
+## Struct pack(1-2-4-4-8)
+```c++
+#pragma pack(1)
+struct S5 {
+	int8_t a;
+	int16_t b;
+	int32_t c;
+	int32_t d;
+	int64_t e;
+}
+```
+
+</textarea></section>
+<section data-markdown  data-auto-animate><textarea data-template>
+## Struct pack(1-2-4-4-8)
+```c++
+#pragma pack(1)
+struct S5 {
+	int8_t a;
+	int16_t b;
+	int32_t c;
+	int32_t d;
+	int64_t e;
+}
+```
+* sizeof(S5) = 19
+
+||||||||||||||||||
+|----|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|
+|    |0|1|2|3|4|5|6|7|8|9|A|B|C|D|E|F|
+|0x00|a|b|b|c|c|c|c|d|d|d|d|e|e|e|e|e|
+|0x10|e|e|e|
+|
+
+</textarea></section>
+<section data-markdown  ><textarea data-template>
+## Вирівнювання
+* `alignas`
+* `alignof`
+* Rust: `#[repr(C, packed)]`
+* "Undefined Behaviour", швидкість
+* RISC (наприклад, ARM)
+* Бінарні файли
+* Масиви
+
+</textarea></section>
+<section data-markdown  ><textarea data-template>
+## Бінарні файли
+* x86/amd64
+* Little Endian (`0x12345678` -> `78 56 34 12`)
+
+</textarea></section>
+<section data-markdown  ><textarea data-template>
+# Демо: GIF parser
+
+</textarea></section>
+<section data-markdown  ><textarea data-template>
+## Організація стеку
+* Знизу доверху, історично:
+	* `|heap> ... <stack|`
+* Порядок локальних змінних не гарантований
+* Пам'ять під всі локальні змінні можна виділити 1 інструкцією `sub RSP,size`
+* Виклики функцій, exceptions
+* `alloca()`/`_malloca()`/`_freea()` (обережно, як мінімум `noinline`)
+```c++
+int x, y;
+int point[2] = {x, y}; // memcpy()
+```
+
+</textarea></section>
+<section data-markdown  ><textarea data-template>
+## Внутрішні блоки
+```c++
+int main(int argc, char* args[]) {
+	char c = 'a';
+	for (int i = 1; i < argc; i++) { // if ()
+		int block = strlen(args[i]);
+		printf("block %p\n", &block);
+	}
+}
+```
+
+</textarea></section>
+<section data-markdown  ><textarea data-template>
+## Загальний принцип
+## TODO: малюнок
+
+|||
+| --- | --- |
+| (Вершина `RSP=0x099C00`) ||
+| Локальні змінні | `fn2()` |
+| Адреса повернення* (наступна інструкція в `fn1` після `fn2(...)`) |
+| Аргументи функції `fn2` (`arr_b, arg_b`)  |
+| ... | `fn1()` |
+| ... | `main()` |
+| ... |
+| Локальні змінні першої функції потоку (thread) | `ntdll.dll: RtlUserThreadStart(...)` |
+| (Початок `RSP=0x100000`) | |
+
+</textarea></section>
+<section data-markdown  ><textarea data-template>
+# Демо: Стек
+
+</textarea></section>
+<section data-markdown  ><textarea data-template>
+## Debug (MS VC++):
+* 0xCCCCCCCC: неініціалізований стек (одночасно і breakpoint)
+* 0xCDCDCDCD: неініціалізована купа
+* 0xDDDDDDDD: звільнена купа
+* 0xABABABAB: HeapAlloc: "захисні байти" навколо виділених в купі даних
+* 0xFDFDFDFD: "захисні байти" навколо виділених в купі даних
+* 0xBAADF00D: LocalAlloc(LMEM_FIXED): неініціалізовані, але виділені в купі
+* 0xFEEEFEEE: після HeapFree()
+
+</textarea></section>
+<section data-markdown  ><textarea data-template>
+## Hexspeak:
+<!-- https://en.wikipedia.org/wiki/Hexspeak -->
+* 0x000FF1CE: "Office", GUID of some MS Office parts
+* 0x8BADF00D: "Ate Bad Food" (iOS, app takes too long to launch)
+* 0xABADCAFE: "A Bad Cafe"
+* 0xBADCAB1E: "Bad Cable"
+* 0xBEEFCACE: "Beef Cake"
+* 0xC00010FF: "Cool Off" (iOS, when app was killed due to a thermal event)
+
+<!--[comment]: # (!!!)
+## Традиційно:
+* локальні змінні - стек
+    * `int x = 5;`
+    * `int inline_array[10] {};`
+    * `std::array<int, 10> inline_array {};`
+* посилання - стек, виділена пам'ять - динамічна купа (heap)
+    * `new int[10] {}`
+    * `std::vector<...> x {};`
+    * `std::string x = "text";`
+    * `std::unique_ptr<...> x {};`
+
+<!--[comment]: # (!!!)
+## Стек
+
+```hex
+0x99ECFEF5F0  40 22 c6 2b f6 7f __ __ 90 f6 fe ec 99 __ __ __ 65 65 65 65 10 10 10 10 28 f6 fe ec 99 __ __ __ ; ? &arr_b[0] arg_b &f
+0x99ECFEF610  38 f6 fe ec 99 __ __ __ 20 f6 fe ec 99 __ __ __ 77 __ __ __ __ __ __ __ 99 99 99 99 99 99 99 99 ; &g &h h f..
+0x99ECFEF630  99 99 99 99 99 99 99 __ 88 88 88 88 88 88 88 88 88 88 88 88 88 88 88 88 2a e3 b9 2d 97 13 __ __ ; ..f g ?
+0x99ECFEF650  __ __ __ __ __ __ __ __ 95 11 c6 2b f6 7f __ __ aa e6 c8 ad 34 10 __ __ 01 __ __ __ __ __ __ __ ; ? ret_fn1 ? ?
+0x99ECFEF670  __ __ __ __ __ __ __ __ fb 97 a8 78 fa 7f __ __ __ __ __ __ __ __ __ __ __ __ __ __ __ __ __ __
+0x99ECFEF690  50 50 50 50 50 50 50 50 51 51 51 51 51 51 51 51 52 52 52 52 52 52 52 52 53 53 53 53 53 53 53 53 ; arr_b
+0x99ECFEF6B0  33 __ __ __ __ __ __ __ 11 11 11 11 11 11 11 11 11 11 11 11 11 11 11 __ 22 22 22 22 22 22 22 22 ; c a b..
+0x99ECFEF6D0  22 22 22 22 22 22 22 22 ba e0 b9 2d 97 13 __ __ b0 33 b6 36 4b 02 __ __ 2a 12 c6 2b f6 7f __ __ ; ..b ? ? ret_main
+0x99ECFEF6F0  01 __ __ __ __ __ __ __ __ __ __ __ __ __ __ __ d0 21 c6 2b f6 7f __ __ 19 18 c6 2b f6 7f __ __
+0x99ECFEF710  40 40 40 40 40 40 40 40 41 41 41 41 41 41 41 41 42 42 42 42 42 42 42 42 43 43 43 43 43 43 43 43 ; arr_a
+0x99ECFEF730  __ __ __ __ __ __ __ __ 60 14 c6 2b f6 7f __ __ __ __ __ __ __ __ __ __ __ __ __ __ __ __ __ __
+0x99ECFEF750  __ __ __ __ __ __ __ __ __ __ __ __ __ __ __ __ __ __ __ __ __ __ __ __ __ __ __ __ __ __ __ __
+0x99ECFEF770  __ __ __ __ __ __ __ __ 34 70 c8 79 fa 7f __ __ __ __ __ __ __ __ __ __ __ __ __ __ __ __ __ __
+0x99ECFEF790  __ __ __ __ __ __ __ __ __ __ __ __ __ __ __ __ __ __ __ __ __ __ __ __ 51 26 f8 7a fa 7f __ __
+0x99ECFEF7B0  __ __ __ __ __ __ __ __ __ __ __ __ __ __ __ __ __ __ __ __ __ __ __ __ __ __ __ __ __ __ __ __
+0x99ECFEF7D0  __ __ __ __ __ __ __ __ __ __ __ __ __ __ __ __ __ __ __ __ __ __ __ __ __ __ __ __ __ __ __ __
+0x99ECFEF7F0  __ __ __ __ __ __ __ __ __ __ __ __ __ __ __ __ 30 fb ff ff e8 04 __ __ 30 fb ff ff d0 04 __ __
+```
+
+<!--[comment]: # (!!!)
+## Детальніше
+```
+0x99ECFEF5F0  40 22 c6 2b f6 7f __ __ ; ? printf
+0x99ECFEF5F8  90 f6 fe ec 99 __ __ __ ; &arr_b[0]
+0x99ECFEF600  65 65 65 65             ; arg_b
+0x99ECFEF604  10 10 10 10
+0x99ECFEF608  28 f6 fe ec 99 __ __ __ ; &f
+0x99ECFEF610  38 f6 fe ec 99 __ __ __ ; &g
+0x99ECFEF618  20 f6 fe ec 99 __ __ __ ; &h
+0x99ECFEF620  77 __ __ __ __ __ __ __ ; uint8_t h[1]
+0x99ECFEF628  99 99 99 99 99 99 99 99 99 99 99 99 99 99 99 __ ; uint8_t f[15]
+0x99ECFEF638  88 88 88 88 88 88 88 88 88 88 88 88 88 88 88 88 ; uint8_t g[16]
+0x99ECFEF648  2a e3 b9 2d 97 13 __ __ ; ?
+0x99ECFEF650  __ __ __ __ __ __ __ __ ; 
+0x99ECFEF658  95 11 c6 2b f6 7f __ __ ; ret_fn1
+0x99ECFEF660  aa e6 c8 ad 34 10 __ __ ; 
+0x99ECFEF668  01 __ __ __ __ __ __ __ ; 
+0x99ECFEF670  __ __ __ __ __ __ __ __ ; 
+0x99ECFEF678  fb 97 a8 78 fa 7f __ __ ; 
+0x99ECFEF680  __ __ __ __ __ __ __ __ ; 
+0x99ECFEF688  __ __ __ __ __ __ __ __ ; 
+0x99ECFEF690  50 50 50 50 50 50 50 50 ; arr_b[0]
+0x99ECFEF698  51 51 51 51 51 51 51 51 ; arr_b[1]
+0x99ECFEF6A0  52 52 52 52 52 52 52 52 ; arr_b[2]
+0x99ECFEF6A8  53 53 53 53 53 53 53 53 ; arr_b[3]
+0x99ECFEF6B0  33 __ __ __ __ __ __ __ ; uint8_t c[1]
+0x99ECFEF6B8  11 11 11 11 11 11 11 11 11 11 11 11 11 11 11 __ ; uint8_t a[15]
+0x99ECFEF6C8  22 22 22 22 22 22 22 22 22 22 22 22 22 22 22 22 ; uint8_t b[16]
+0x99ECFEF6D8  ba e0 b9 2d 97 13 __ __ ; 
+0x99ECFEF6E0  b0 33 b6 36 4b 02 __ __ ; 
+0x99ECFEF6E8  2a 12 c6 2b f6 7f __ __ ; ret_main
+0x99ECFEF6F0  01 __ __ __ __ __ __ __ ; 
+0x99ECFEF6F8  __ __ __ __ __ __ __ __ ; 
+0x99ECFEF700  d0 21 c6 2b f6 7f __ __ ; 
+0x99ECFEF708  19 18 c6 2b f6 7f __ __ ; __scrt_release_startup_lock
+0x99ECFEF710  40 40 40 40 40 40 40 40 ; arr_a[0]
+0x99ECFEF718  41 41 41 41 41 41 41 41 ; arr_a[1]
+0x99ECFEF720  42 42 42 42 42 42 42 42 ; arr_a[2]
+0x99ECFEF728  43 43 43 43 43 43 43 43 ; arr_a[3]
+0x99ECFEF730  __ __ __ __ __ __ __ __ ; 
+0x99ECFEF738  60 14 c6 2b f6 7f __ __ ; -> __scrt_common_main_seh()
+0x99ECFEF740  __ __ __ __ __ __ __ __ ; 
+0x99ECFEF748  __ __ __ __ __ __ __ __ ; 
+0x99ECFEF750  __ __ __ __ __ __ __ __ ; 
+0x99ECFEF758  __ __ __ __ __ __ __ __ ; 
+0x99ECFEF760  __ __ __ __ __ __ __ __ ; 
+0x99ECFEF768  __ __ __ __ __ __ __ __ ; 
+0x99ECFEF770  __ __ __ __ __ __ __ __ ; 
+0x99ECFEF778  34 70 c8 79 fa 7f __ __ ; -> kernel32.dll!BaseThreadInitThunk()
+0x99ECFEF780  __ __ __ __ __ __ __ __ ; 
+0x99ECFEF788  __ __ __ __ __ __ __ __ ; 
+0x99ECFEF790  __ __ __ __ __ __ __ __ ; 
+0x99ECFEF798  __ __ __ __ __ __ __ __ ; 
+0x99ECFEF7A0  __ __ __ __ __ __ __ __ ; 
+0x99ECFEF7A8  51 26 f8 7a fa 7f __ __ ; -> ntdll.dll!RtlUserThreadStart()
+0x99ECFEF7B0  __ __ __ __ __ __ __ __ ; 
+0x99ECFEF7B8  __ __ __ __ __ __ __ __ ; 
+0x99ECFEF7C0  __ __ __ __ __ __ __ __ ; 
+0x99ECFEF7C8  __ __ __ __ __ __ __ __ ; 
+0x99ECFEF7D0  __ __ __ __ __ __ __ __ ; 
+0x99ECFEF7D8  __ __ __ __ __ __ __ __ ; 
+0x99ECFEF7E0  __ __ __ __ __ __ __ __ ; 
+0x99ECFEF7E8  __ __ __ __ __ __ __ __ ; 
+0x99ECFEF7F0  __ __ __ __ __ __ __ __ ; 
+0x99ECFEF7F8  __ __ __ __ __ __ __ __ ; 
+0x99ECFEF800  30 fb ff ff e8 04 __ __ ; ? -1232 | 1256
+0x99ECFEF808  30 fb ff ff d0 04 __ __ ; ? -1232 | 1232
+``` -->
+
+</textarea></section>
+<section data-markdown  ><textarea data-template>
+## Мінімальна програма
+
+* Вимкнути C++ Exceptions (прибрати "/EH*")
+* Не використовувати:
+    * `(argc, args, env)`
+    * глобальні змінні, що мають конструктор чи деструктор
+    * більшість бібліотеки C та C++ - наприклад, `<iostream>`, `<stdio.h>`
+* Розмір .exe файлу 5kB
+* Rust: `#![no_std]`
+
+</textarea></section>
+<section data-markdown  ><textarea data-template>
+## Демо: minimal & dumpbin
+* Секції
+* Розміри
+* Безпека: read/write/exec
+* Адреси повернення
+
+</textarea></section>
+<section data-markdown  ><textarea data-template>
+## Розмір стеку
+* Основний потік:
+	* `link /STACK:reserve[,commit]` = 1M/4k
+	* `ld -stack_size 0x800000` = 8M
+* Додатковий потік:
+	```c++
+	// Win
+	HANDLE CreateThread(..., SIZE_T dwStackSize, ...);
+	// Linux
+	int pthread_attr_setstack(..., size_t stacksize);
+	```
+
+</textarea></section>
+<section data-markdown  ><textarea data-template>
+## Контекст потоку
+## (Thread context)
+* Регістри
+* Адреса стеку (хоча є доступ іншим потокам)
+* Службова інформація ОС (branches, exceptions)
+* Окремий контекст для ядра (без SSE)
+
+</textarea></section>
+<section data-markdown  ><textarea data-template>
+## Купа (heap)
+```c++ [1-3|4-6|4,7|1-7]
+// колись:
+Point* point  = new Point(x, y); // need "delete array";
+Point* points = new Point[50]; // need "delete[] array";
+// тепер C++11: RAII - явний власник
+std::unique_ptr<Point> point = std::make_unique<Point>(x, y);
+auto                   point = std::make_unique<Point>(x, y);
+std::shared_ptr<Point> point = std::make_shared<Point>(x, y);
+```
+
+</textarea></section>
+<section data-markdown  ><textarea data-template>
+## Купа (heap)
+* `std::vector<T>`
+* `std::map<K, V>`
+	* `std::unordered_map<K, V>`
+* `std::string`
+	* `std::wstring`
+
+</textarea></section>
+<section data-markdown  ><textarea data-template>
+## Task Manager (система)
+* **Committed** - cумарно зайнята віртуальна пам'ять всіх процесів.
+* **Cached** - пасивно використовується ОС. Наприклад, кеш прочитаних файлів
+* **Paged pool** - переміщено в swap (pagefile)
+* **Non-paged pool** - скільки пам'яті неможливо перенести в swap
+
+</textarea></section>
+<section data-markdown  ><textarea data-template>
+## Task Manager (процес)
+* **Memory - Private Working Set** - приватна пам'ять, не доступна іншим процесам*
+* **Memory - Working Set** - сума приватної пам'яті (лише RAM) процесу та зайнятої спільними DLL
+* **Memory - Peak Working Set** - максимум "Working Set" з моменту запуску
+* **Memory - Commit Size** - об'єм зарезервованої чи виданої віртуальної пам'яті
+* **Page Faults** - скільки раз системі довелось вантажити дані зі swap'у
+
+</textarea></section>
+<section data-markdown  ><textarea data-template>
+## Оптимізації компілятора
+* inline
+* регістри
+* вирівнювання
+* зміна порядку операцій (крім `atomic`)
+* купа - повільніше (див. Java, C#)
+<!--* __restrict `c[] = a[]+b[]`-->
+
+</textarea></section>
+<section data-markdown ><textarea data-template>
+## Підсумок
+## TODO: малюнок
+||||Регістри`[2*thread_count]`|
+|---|-|-|-|
+|RAM (16 GB)|MMU|Virtual #1 (128 TB)|Стек (stack)`[2*thread_count]`
+|Swap (10 GB)|OS|Virtual #2 (128 TB)|Код (.text)
+|||Virtual #3 (128 TB)|Константи (.rdata)
+|||...|Глобальні/статичні змінні (.data, .bss)
+|||Virtual #process_count|Інші (.reloc, .rsrc, .pdata, .idata, ...)
+||||Купа (heap)
+
+https://docs.microsoft.com/en-us/windows/win32/debug/pe-format
+
+<!-- 
+# ?
+C++ abstract machine vs Java/C# virtual machine
+
+# Heap
+
+# TODO - VM
+install TCmd
+VS:
+	Set up Text Editor newlines
+	Load Symbols (ntdll, kernel32)
+	Show All Files - in all projects
+-->
+</textarea></section>
+			</div>
+		</div>
+
+		<script src="dist/reveal.js"></script>
+		<script src="plugin/notes/notes.js"></script>
+		<script src="plugin/markdown/markdown.js"></script>
+		<script src="plugin/highlight/highlight.js"></script>
+		<script src="plugin/math/math.js"></script>
+		<script>
+			// More info about initialization & config:
+			// - https://revealjs.com/initialization/
+			// - https://revealjs.com/config/
+Reveal.initialize({
+controls : false,
+markdown : {smartypants: true},
+				hash: true,
+				// Learn about plugins: https://revealjs.com/plugins/
+				plugins: [ RevealMarkdown, RevealHighlight, RevealNotes, RevealMath ]
+			});
+		</script>
+	</body>
+</html>
