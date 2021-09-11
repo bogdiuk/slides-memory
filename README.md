@@ -1,0 +1,1 @@
+https://bogdiuk.github.io/slides-memory/
