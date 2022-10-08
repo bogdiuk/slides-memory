@@ -18,6 +18,10 @@
 
 Богдюк Микола (Java, C++, Rust, C#)
 
+[@mbohdiuk](https://www.instagram.com/mbohdiuk/)
+
+https://bogdiuk.github.io/slides-memory/
+
 <!-- [comment]: # (!!!)
 ## Про що?
 Орієнтовано на нативні програми (Asm, C, C++, Rust, Objective C, Swift)
@@ -26,11 +30,26 @@
 
 </textarea></section>
 <section data-markdown  ><textarea data-template>
+## Коли застосовно?
+* Збереження - PNG, MP4, EXE
+* Ефективна передача даних (між процесами, компами) - RPC, HTTP/2
+	* Є час відтестувати і зробити переглядач
+* Швидкість
+* Відлагоджування (debugging)
+
+## Коли ні?
+* Оптимізатор змінює розміщення (layout)
+* Зручність важливіша за швидкість - JSON/YAML, CONF, HTTP/1
+
+</textarea></section>
+<section data-markdown  ><textarea data-template>
 ## Нащо?
 * Розуміти, що відбувається "під капотом"
 * Знаходити баги і повільний код
 * Одразу писати оптимальніше
+	* "Premature optimization"
 
+	
 </textarea></section>
 <section data-markdown  data-auto-animate><textarea data-template>
 ## Struct
@@ -56,11 +75,21 @@ struct S1 {
 ```
 * sizeof(S1) = 16
 
+<div class="layoutTable1">
+<style>
+    .layoutTable1 tr:nth-child(2) td:nth-child(n+2):nth-child(-n+5) { background: yellow; }
+    .layoutTable1 tr:nth-child(2) td:nth-child(n+6):nth-child(-n+9) { background: lightgreen; }
+    .layoutTable1 tr:nth-child(2) td:nth-child(n+10):nth-child(-n+13) { background: cyan; }
+    .layoutTable1 tr:nth-child(2) td:nth-child(n+14):nth-child(-n+17) { background: pink; }
+    .layoutTable1 tr:nth-child(3) td:nth-child(n+2):nth-child(-n+5) { background: orange; }
+</style>
+
 ||||||||||||||||||
 |----|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|
 |    |0|1|2|3|4|5|6|7|8|9|A|B|C|D|E|F|
 |0x00|a|a|a|a|b|b|b|b|c|c|c|c|d|d|d|d|
-|
+
+</div>
 
 </textarea></section>
 <section data-markdown  data-auto-animate><textarea data-template>
@@ -87,11 +116,20 @@ struct S2 {
 ```
 * sizeof(S2) = 16
 
+<div class="layoutTable2">
+<style>
+    .layoutTable2 tr:nth-child(2) td:nth-child(2) { background: yellow; }
+    .layoutTable2 tr:nth-child(2) td:nth-child(n+6):nth-child(-n+9) { background: lightgreen; }
+    .layoutTable2 tr:nth-child(2) td:nth-child(n+10):nth-child(-n+13) { background: cyan; }
+    .layoutTable2 tr:nth-child(2) td:nth-child(n+14):nth-child(-n+17) { background: pink; }
+</style>
+
 ||||||||||||||||||
 |----|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|
 |    |0|1|2|3|4|5|6|7|8|9|A|B|C|D|E|F|
 |0x00|a|-|-|-|b|b|b|b|c|c|c|c|d|d|d|d|
-|
+
+</div>
 
 </textarea></section>
 <section data-markdown  data-auto-animate><textarea data-template>
@@ -118,11 +156,20 @@ struct S3 {
 ```
 * sizeof(S3) = 12
 
+<div class="layoutTable3">
+<style>
+    .layoutTable3 tr:nth-child(2) td:nth-child(2) { background: yellow; }
+    .layoutTable3 tr:nth-child(2) td:nth-child(n+4):nth-child(-n+5) { background: lightgreen; }
+    .layoutTable3 tr:nth-child(2) td:nth-child(n+6):nth-child(-n+9) { background: cyan; }
+    .layoutTable3 tr:nth-child(2) td:nth-child(n+10):nth-child(-n+13) { background: pink; }
+</style>
+
 ||||||||||||||||||
 |----|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|
 |    |0|1|2|3|4|5|6|7|8|9|A|B|C|D|E|F|
 |0x00|a|-|b|b|c|c|c|c|d|d|d|d|
-|
+
+</div>
 
 </textarea></section>
 <section data-markdown  data-auto-animate><textarea data-template>
@@ -151,24 +198,34 @@ struct S4 {
 ```
 * sizeof(S4) = 24
 
+<div class="layoutTable4">
+<style>
+    .layoutTable4 tr:nth-child(2) td:nth-child(2) { background: yellow; }
+    .layoutTable4 tr:nth-child(2) td:nth-child(n+4):nth-child(-n+5) { background: lightgreen; }
+    .layoutTable4 tr:nth-child(2) td:nth-child(n+6):nth-child(-n+9) { background: cyan; }
+    .layoutTable4 tr:nth-child(2) td:nth-child(n+10):nth-child(-n+13) { background: pink; }
+    .layoutTable4 tr:nth-child(3) td:nth-child(n+2):nth-child(-n+9) { background: orange; }
+</style>
+
 ||||||||||||||||||
 |----|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|
 |    |0|1|2|3|4|5|6|7|8|9|A|B|C|D|E|F|
 |0x00|a|-|b|b|c|c|c|c|d|d|d|d|-|-|-|-|
 |0x10|e|e|e|e|e|e|e|e|
-|
+
+</div>
 
 </textarea></section>
 <section data-markdown  data-auto-animate><textarea data-template>
 ## Struct pack(1-2-4-4-8)
 ```c++
-#pragma pack(1)
+#pragma pack(1) // [repr(packed)] in Rust
 struct S5 {
 	int8_t a;
 	int16_t b;
 	int32_t c;
 	int32_t d;
-	int64_t e;
+	int64_t e; // ! unaligned access
 }
 ```
 
@@ -176,16 +233,26 @@ struct S5 {
 <section data-markdown  data-auto-animate><textarea data-template>
 ## Struct pack(1-2-4-4-8)
 ```c++
-#pragma pack(1)
+#pragma pack(1) // [repr(packed)] in Rust
 struct S5 {
 	int8_t a;
 	int16_t b;
 	int32_t c;
 	int32_t d;
-	int64_t e;
+	int64_t e; // ! unaligned access
 }
 ```
 * sizeof(S5) = 19
+
+<div class="layoutTable5">
+<style>
+    .layoutTable5 tr:nth-child(2) td:nth-child(2) { background: yellow; }
+    .layoutTable5 tr:nth-child(2) td:nth-child(n+3):nth-child(-n+4) { background: lightgreen; }
+    .layoutTable5 tr:nth-child(2) td:nth-child(n+5):nth-child(-n+8) { background: cyan; }
+    .layoutTable5 tr:nth-child(2) td:nth-child(n+9):nth-child(-n+12) { background: pink; }
+    .layoutTable5 tr:nth-child(2) td:nth-child(n+13) { background: orange; }
+    .layoutTable5 tr:nth-child(3) td:nth-child(n+2):nth-child(-n+4) { background: orange; }
+</style>
 
 ||||||||||||||||||
 |----|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|-|
@@ -194,8 +261,10 @@ struct S5 {
 |0x10|e|e|e|
 |
 
+</div>
+
 </textarea></section>
-<section data-markdown  data-auto-animate><textarea data-template>
+<section data-markdown  ><textarea data-template>
 ## Вирівнювання
 * `alignas`
 * `alignof`
@@ -205,34 +274,32 @@ struct S5 {
 * Масиви
 
 </textarea></section>
-<section data-markdown  data-auto-animate><textarea data-template>
-## Купа (heap): `std::vector<T>`
-![vector](img/vector.png)
-
-</textarea></section>
-<section data-markdown  data-auto-animate><textarea data-template>
-## Купа (heap)
-* `std::vector<T>`
-* `std::map<K, V>`
-	* `std::unordered_map<K, V>`
-* `std::string`
-	* `std::wstring`
-
-</textarea></section>
-<section data-markdown  data-auto-animate><textarea data-template>
-<!--## Java: `List<Integer>`-->
-![List<Integer>](img/list-of-int-0.png)
-
-</textarea></section>
 <section data-markdown  ><textarea data-template>
-<!--## Java: `List<Integer>`-->
-![List<Integer>](img/list-of-int-1.png)
+## Endianness
+* Little/Big Endian - x86
+* (short) 0x1234<span style="background:orange">5678</span>
+
+<div class="endianLayout">
+<style>
+    .endianLayout tr:nth-child(3) td:nth-child(n+2):nth-child(-n+3) { background: orange; }
+    .endianLayout tr:nth-child(3) td:nth-child(n+9):nth-child(-n+10) { background: orange; }
+</style>
+
+|||||||||||
+|-|-|-|-|-|-|-|-|-|-|
+|Little Endian|||||Big Endian|
+||0|1|2|3||0|1|2|3|
+||78|56|34|12||12|34|56|78|
+
+</div>
 
 </textarea></section>
 <section data-markdown  ><textarea data-template>
 ## Бінарні файли
 * Приклади: PNG, CRLI*
-* Little Endian (`0x12345678` -> `78 56 34 12`)
+* Magic (`%PNG`)
+* Заголовок (header) - версія, метадані, зсуви і розміри структур
+* Самі підструктури
 
 </textarea></section>
 <section data-markdown  ><textarea data-template>
@@ -241,11 +308,11 @@ struct S5 {
 </textarea></section>
 <section data-markdown  ><textarea data-template>
 ## Стек і купа
-* Області пам'яті
 * Структури даних
 	* Стек - FILO
 	* Купа (Heap) - дерево
 		* `parent.key ≥ child[*].key`
+* Області пам'яті
 * Звернення до стеку швидше, але він маленький
 * Безпека: легше зіпсувати дані*
 
@@ -276,11 +343,11 @@ int main(int argc, char* args[]) {
 }
 ```
 
-</textarea></section>
-<section data-markdown  ><textarea data-template>
+<!-- [comment]: # (!!!)
 # Демо: Стек
 * Memory view
 * Stack trace
+-->
 
 </textarea></section>
 <section data-markdown  ><textarea data-template>
@@ -341,26 +408,6 @@ int main(int argc, char* args[]) {
 
 </textarea></section>
 <section data-markdown  ><textarea data-template>
-## Мінімальна програма
-* Вимкнути C++ Exceptions (прибрати "/EH*")
-* Не використовувати:
-    * `(argc, args, env)`
-    * глобальні змінні, що мають конструктор чи деструктор
-    * більшість бібліотеки C та C++ - наприклад, `<iostream>`, `<stdio.h>`
-* Розмір .exe файлу 5kB
-* Rust: `#![no_std]`
-
-</textarea></section>
-<section data-markdown  ><textarea data-template>
-## Демо: minimal & dumpbin
-* Секції
-* Розміри
-* Коротший стек
-* Безпека: read/write/exec
-* Адреси повернення
-
-</textarea></section>
-<section data-markdown  ><textarea data-template>
 ## Розмір стеку
 * Основний потік:
 	* `link /STACK:reserve[,commit]` = 1M/4k
@@ -384,10 +431,6 @@ int main(int argc, char* args[]) {
 
 </textarea></section>
 <section data-markdown  ><textarea data-template>
-![List<Integer>](img/2apps.png)
-
-</textarea></section>
-<section data-markdown  ><textarea data-template>
 ## Віртуальна пам'ять
 * Безпека, ізоляція
 * Сторінки по 4kB (рідко +)
@@ -398,7 +441,11 @@ int main(int argc, char* args[]) {
 
 </textarea></section>
 <section data-markdown  ><textarea data-template>
-![List<Integer>](img/swap.png)
+![2apps](img/2apps.png)
+
+</textarea></section>
+<section data-markdown  ><textarea data-template>
+![swap](img/swap.png)
 
 </textarea></section>
 <section data-markdown  ><textarea data-template>
@@ -432,29 +479,81 @@ int main(int argc, char* args[]) {
 * **Memory - Commit Size** - об'єм зарезервованої чи виданої віртуальної пам'яті
 * **Page Faults** - скільки раз системі довелось вантажити дані зі swap'у
 
+<!-- [comment]: # (!!!)
+## Мінімальна програма
+* Вимкнути C++ Exceptions (прибрати "/EH*")
+* Не використовувати:
+    * `(argc, args, env)`
+    * глобальні змінні, що мають конструктор чи деструктор
+    * більшість бібліотеки C та C++ - наприклад, `<iostream>`, `<stdio.h>`
+* Розмір .exe файлу 5kB
+* Rust: `#![no_std]`
+-->
+
+<!-- [comment]: # (!!!)
+## Демо: minimal & dumpbin
+* Секції
+* Розміри
+* Коротший стек
+* Безпека: read/write/exec
+* Адреси повернення
+-->
+
+</textarea></section>
+<section data-markdown  ><textarea data-template>
+## Будова EXE/DLL/ELF
+* Код (.text)
+* Константи (.rdata)
+* Глобальні/статичні змінні (.data, .bss)
+* Інші (.reloc, .rsrc, .pdata, .idata, ...)
+
 </textarea></section>
 <section data-markdown  ><textarea data-template>
 ## Пам'ять процесу
 * Регістри`[2*thread_count]`
 * Стек (stack)`[2*thread_count]`
-* Код (.text)
-* Константи (.rdata)
-* Глобальні/статичні змінні (.data, .bss)
-* Інші (.reloc, .rsrc, .pdata, .idata, ...)
+* Секції з EXE
+	* Найкраще значення за замовчуванням - `0`
 * Купа (heap)
 
 </textarea></section>
-<section data-markdown  ><textarea data-template>
+<section data-markdown  data-auto-animate><textarea data-template>
 ## Купа (heap)
-```c++ [1-3|4-6|4,7|1-7]
+```c++ [1-3|4-6|4,7|4,8|4,9|1-9]
 // колись:
-Point* point  = new Point(x, y); // need "delete array";
-Point* points = new Point[50]; // need "delete[] array";
+Point* point  = new Point(x, y); // requires "delete array";
+Point* points = new Point[50];   // requires "delete[] array";
 // C++11: RAII - явний власник
 std::unique_ptr<Point> point = std::make_unique<Point>(x, y);
 auto                   point = std::make_unique<Point>(x, y);
 std::shared_ptr<Point> point = std::make_shared<Point>(x, y);
+                Point* borrowed = point.get();
+std::weak_ptr  <Point> weak  = point;
 ```
+
+</textarea></section>
+<section data-markdown  data-auto-animate><textarea data-template>
+## Купа (heap)
+* `std::vector<T>`
+* `std::map<K, V>`
+	* `std::unordered_map<K, V>`
+* `std::string`
+	* `std::wstring`
+
+</textarea></section>
+<section data-markdown  data-auto-animate><textarea data-template>
+## Купа (heap): `std::vector<T>`
+![vector](img/vector.png)
+
+</textarea></section>
+<section data-markdown  data-auto-animate><textarea data-template>
+<!--## Java: `List<Integer>`-->
+![List<Integer>](img/list-of-int-0.png)
+
+</textarea></section>
+<section data-markdown  ><textarea data-template>
+<!--## Java: `List<Integer>`-->
+![List<Integer>](img/list-of-int-1.png)
 
 </textarea></section>
 <section data-markdown  ><textarea data-template>
@@ -485,6 +584,7 @@ std::shared_ptr<Point> point = std::make_shared<Point>(x, y);
 <section data-markdown ><textarea data-template>
 
 ## https://bogdiuk.github.io/slides-memory/
+[@mbohdiuk](https://www.instagram.com/mbohdiuk/)
 <!--
 * https://en.wikipedia.org/wiki/X86_calling_conventions
 * https://docs.microsoft.com/en-us/windows/win32/debug/pe-format
